@@ -106,16 +106,18 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Training parameters.')
     parser.add_argument('-s', '--steps', default=200, type=int, help='max number of steps per episode.')
     parser.add_argument('-e', '--episodes', default=10, type=int, help='number of episodes.')
+    parser.add_argument('-a', '--alpha', default=4, type=int, help='value of alpha.')
+    parser.add_argument('-t', '--threshold', default=25088, type=int, help='value of threshold')
     args = parser.parse_args()
 print(" >> Training... ")
 env = wrap_env(gym.make("CartPole-v1"))
 model = VGG16(weights='imagenet', include_top=False)
 img_feat=[]
 W = np.ones((3,25088)) #winnow2 initialisation
-alphas = [2,3,4]
+alphas = [args.alpha]
 best_model_weights = np.ones((3,25088))
 best_scores=[0,0,0]
-thres = [25088, 25088 // 2]
+thres = [args.threshold]
 for ep in range(args.episodes): 
     env.reset()
     print("\nEpisode: "+str(ep))
@@ -144,6 +146,7 @@ for ep in range(args.episodes):
             if i>best_scores[0]:
                 best_scores[0] = i
                 best_model_weights[0] = W[0]
+                #print(best_model_weights[:50])
 	
             print("state: ",i, next_state, reward, done, info)
             print("action: ",action)
@@ -153,6 +156,7 @@ for ep in range(args.episodes):
         print("state: ",i, next_state, reward, done, info)
         print("action: ",action)
         print("score for alpha="+str(alphas[0])+": ", i, "best score: ",best_scores)
+#print(best_model_weights[:50])
 np.savetxt('winnow_weights.csv',best_model_weights, delimiter=', ')
 
 
